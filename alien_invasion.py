@@ -11,12 +11,12 @@ class AlienInvasion:
     
     def __init__(self):
         """Init the game with base game resources, set the display name & size"""
+        # Create an instance and assign the settings.
         pygame.init()
-        pygame.display.set_caption('Alien Invasion - weretheone')
-        program_icon = pygame.image.load('images/alien.png')
-        pygame.display.set_icon(program_icon)
-        # Create an instance and assign to the settings.
         self.settings = Settings()
+        # Set the icon and name for the window
+        pygame.display.set_icon(self.settings.game_icon)
+        pygame.display.set_caption(self.settings.game_name)
         # Init the screen in windowed mode.
         self.screen = pygame.display.set_mode((self.settings.screen_width,
             self.settings.screen_height))
@@ -36,9 +36,12 @@ class AlienInvasion:
             self.ship.update()
             # Update the bullet
             self.bullets.update()
+            # Remove the bullets which are not visible
+            self._update_bullet() 
             # Update the screen
             self._update_screen()
-            
+   
+
     def _check_events(self):
         """This method is for collecting the user events"""
         for event in pygame.event.get():
@@ -99,12 +102,19 @@ class AlienInvasion:
         # Display the most recently drawn screen visible
         pygame.display.flip()
 
-
     def _fire_bullet(self):
         """This method will call the Bullet method for a new bullet then it
          will add it to the group we defined earlier. """
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
+    def _update_bullet(self):
+        """This method is responsible to remove the bullets which are no longer
+        visible on the screen."""
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <=0:
+               self.bullets.remove(bullet)
 
 
 if __name__ == '__main__':
