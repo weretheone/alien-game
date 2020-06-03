@@ -12,7 +12,8 @@ class AlienInvasion:
     """This is the base game class which manages the assets and behaviours"""
     
     def __init__(self):
-        """Init the game with base game resources, set the display name & size"""
+        """Init the game with base game resources, set the display name  and
+         size and do various settings"""
         # Create an instance and assign the settings.
         pygame.init()
         self.settings = Settings()
@@ -44,6 +45,8 @@ class AlienInvasion:
             self.ship.update()
             # Update the bullet
             self.bullets.update()
+            # Update the aliens
+            self._update_aliens()
             # Remove the bullets which are not visible
             self._update_bullet() 
             # Update the screen
@@ -134,6 +137,16 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <=0:
                self.bullets.remove(bullet)
+        # Check for any bullets that have hit aliens.
+        #   If so, get rid of the bullet and the alien.
+        collisions = pygame.sprite.groupcollide(
+                self.bullets, self.aliens, True, True)
+
+    def _update_aliens(self):
+        """This method is for moving aliens around the screen and update their
+        position based on the speed"""
+        self._check_fleet_edges()
+        self.aliens.update()
     
     def _create_fleet(self):
         """This method is for creating the alien fleet above the player"""
@@ -164,6 +177,18 @@ class AlienInvasion:
         alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
         self.aliens.add(alien)
 
+    def _check_fleet_edges(self):
+        """Respond to alien reaching edge of the screen"""
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self._change_fleet_direction()
+                break 
+
+    def _change_fleet_direction(self):
+        """Drop the entire fleet and change it's direction"""
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
 
 
 if __name__ == '__main__':
