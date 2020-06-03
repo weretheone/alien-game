@@ -1,10 +1,12 @@
 import sys
 import pygame
 
-# Load the Settings, Ship, Bullet class from separate files
+# Load the classes from separate files
 from settings import Settings
 from ship import Ship
 from bullet import Bullet
+from alien import Alien
+from star import Star
 
 class AlienInvasion:
     """This is the base game class which manages the assets and behaviours"""
@@ -26,6 +28,12 @@ class AlienInvasion:
         self.ship = Ship(self)
         # Init the bullet sprite.
         self.bullets = pygame.sprite.Group()
+        # Init the aliens.
+        self.aliens = pygame.sprite.Group()
+        self._create_fleet()
+        # Init the stars
+        self.stars = pygame.sprite.Group()
+        self._create_stars()
 
     def run_game(self):
         """This is the main loop for the game"""
@@ -94,13 +102,24 @@ class AlienInvasion:
         included in this method to display on the screen."""
         # Set the background color during each redraw.
         self.screen.fill(self.settings.bg_color)
+        # Fill the background with some stars
+        self.stars.draw(self.screen)
         # Draw the group of bullets on the screen.
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
+        # Draw the alien fleet
+        self.aliens.draw(self.screen)
         # Draw the ship after bullets so it is above the bullet
         self.ship.blitme()
         # Display the most recently drawn screen visible
         pygame.display.flip()
+
+    def _create_stars(self):
+        """This method is for creating stars in the background"""
+        # Fill the background with 50 stars
+        for each_star in range(60):
+            star = Star(self)
+            self.stars.add(star)
 
     def _fire_bullet(self):
         """This method will call the Bullet method for a new bullet then it
@@ -115,6 +134,36 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <=0:
                self.bullets.remove(bullet)
+    
+    def _create_fleet(self):
+        """This method is for creating the alien fleet above the player"""
+        alien = Alien(self)
+        # Examine the alien image size
+        alien_width, alien_height = alien.rect.size
+        # Add some space at the two end as margin
+        available_space_x = self.settings.screen_width - (2 * alien_width)
+        # Find out how many aliens fit in one row
+        number_aliens_x = available_space_x // (2 * alien_width)
+        # Examine the ship height and add in the calculations
+        ship_height = self.ship.rect.height
+        available_space_y = (self.settings.screen_height -
+                                (3 * alien_height) - ship_height)
+        # Find out how many rows fit
+        numer_rows = available_space_y // (2 * alien_height)
+        # Create the aliens
+        for row_number in range(numer_rows):
+            for alien_number in range(number_aliens_x):
+                self._create_alien(alien_number, row_number)
+       
+    def _create_alien(self, alien_number, row_number):
+        """Create the aliens on the screen""" 
+        alien = Alien(self)
+        alien_width, alien.height = alien.rect.size
+        alien.x = alien_width + 2 * alien_width * alien_number
+        alien.rect.x = alien.x
+        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
+        self.aliens.add(alien)
+
 
 
 if __name__ == '__main__':
