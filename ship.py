@@ -1,10 +1,12 @@
 import pygame
+from pygame.sprite import Sprite
 
-class Ship:
+class Ship(Sprite):
 	"""This class defined for the player's ship"""
 	
 	def __init__(self, ai_game):
 		"""Spawn and set the starting position of the ship"""
+		super().__init__()
 		self.screen = ai_game.screen
 		self.settings = ai_game.settings
 		self.screen_rect = ai_game.screen.get_rect()
@@ -48,3 +50,10 @@ class Ship:
 		# Update the ship from self.x
 		self.rect.x = self.x
 		self.rect.y = self.y
+
+	def center_ship(self):
+		"""This method is putting back the ship to the center"""
+		self.rect.midbottom = self.screen_rect.midbottom
+		self.x = float(self.rect.x)
+		self.y = float(self.rect.y)
+
